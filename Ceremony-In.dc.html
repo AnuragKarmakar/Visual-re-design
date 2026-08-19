@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=JetBrains+Mono:wght@500;700&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    a { color: oklch(0.55 0.23 302); }
+    a:hover { color: oklch(0.45 0.22 302); }
+    @keyframes ceremonyFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .cer-anim { animation: ceremonyFadeUp 0.4s cubic-bezier(.22,1,.36,1) both; }
+    .cer-carousel::-webkit-scrollbar { display: none; }
+    .cer-carousel { scrollbar-width: none; }
+    @keyframes cerSplashFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes cerTwinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.85; } }
+    @keyframes cerFloatSlow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+    @keyframes cerDrift1 { 0% { transform: translate(0,0); } 50% { transform: translate(24px,-30px); } 100% { transform: translate(0,0); } }
+    @keyframes cerDrift2 { 0% { transform: translate(0,0); } 50% { transform: translate(-30px,-22px); } 100% { transform: translate(0,0); } }
+    @keyframes confettiFall { 0% { opacity: 0; transform: translateY(-10px) rotate(0deg); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(200px) rotate(220deg); } }
+    @keyframes xpPop { 0% { opacity: 0; transform: translateY(-6px) scale(0.9); } 20% { opacity: 1; transform: translateY(0) scale(1.05); } 80% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-6px) scale(0.95); } }
+    .cer-toast { animation: xpPop 1.4s ease both; }
+    input::placeholder, textarea::placeholder { color: oklch(0.55 0.02 280 / 0.55); }
+    .cer-range { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 999px; outline: none; }
+    .cer-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 999px; background: oklch(0.99 0.01 85); border: 2.5px solid oklch(0.16 0.02 280); cursor: pointer; }
+    .cer-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 999px; background: oklch(0.99 0.01 85); border: 2.5px solid oklch(0.16 0.02 280); cursor: pointer; }
+    .cer-range { transition: background 0.15s ease; }
+    .cer-check { accent-color: oklch(0.55 0.23 302); width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+  </style>
+</helmet>
+
+<sc-if value="{{ isTealCanvas }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:-1;background:linear-gradient(160deg, oklch(0.74 0.11 195) 0%, oklch(0.46 0.18 300) 55%, oklch(0.24 0.11 300) 100%);"></div>
+</sc-if>
+<sc-if value="{{ isVioletCanvas }}" hint-placeholder-val="{{ true }}">
+  <div style="position:fixed;inset:0;z-index:-1;background:radial-gradient(1100px 700px at 15% -10%, oklch(0.42 0.17 300), transparent 60%), radial-gradient(900px 600px at 105% 20%, oklch(0.50 0.20 30 / 0.35), transparent 55%), oklch(0.24 0.11 300);"></div>
+</sc-if>
+
+<div style="position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: linear-gradient(180deg, #5F2AC1, #8D00FF, #000000)" aria-hidden="true">
+  <sc-for list="{{ bgStars }}" as="star" hint-placeholder-count="40">
+    <div style="position:absolute;top:{{ star.top }};left:{{ star.left }};width:{{ star.size }};height:{{ star.size }};border-radius:999px;background:oklch(0.99 0.01 85);opacity:0.7;animation:cerTwinkle {{ star.dur }} ease-in-out infinite;animation-delay:{{ star.delay }};"></div>
+  </sc-for>
+  <div style="position:absolute;inset:0;opacity:{{ layerAOpacity }};transition:opacity 0.85s ease;">
+    <div style="position:absolute;inset:0;background:radial-gradient(1200px 800px at 20% 0%, {{ bgTint1A }}, transparent 60%), radial-gradient(1000px 700px at 100% 30%, {{ bgTint2A }}, transparent 55%);"></div>
+    <sc-for list="{{ bgItemsA }}" as="item" hint-placeholder-count="4">
+      <img src="{{ item.src }}" style="position:absolute;{{ item.posStyle }}width:{{ item.width }};opacity:{{ item.opacity }};animation:{{ item.animStyle }};">
+    </sc-for>
+  </div>
+  <div style="position:absolute;inset:0;opacity:{{ layerBOpacity }};transition:opacity 0.85s ease;">
+    <div style="position:absolute;inset:0;background:radial-gradient(1200px 800px at 20% 0%, {{ bgTint1B }}, transparent 60%), radial-gradient(1000px 700px at 100% 30%, {{ bgTint2B }}, transparent 55%);"></div>
+    <sc-for list="{{ bgItemsB }}" as="item" hint-placeholder-count="4">
+      <img src="{{ item.src }}" style="position:absolute;{{ item.posStyle }}width:{{ item.width }};opacity:{{ item.opacity }};animation:{{ item.animStyle }};">
+    </sc-for>
+  </div>
+</div>
+
+<sc-if value="{{ showSplash }}" hint-placeholder-val="{{ true }}">
+  <div style="position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:oklch(0.24 0.11 300);opacity:{{ splashOpacity }};transition:opacity 0.28s ease;">
+    <img src="assets/logo-final.png" style="width:88px;height:88px;object-fit:contain;animation:cerFloatSlow 1.4s ease-in-out infinite;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.82 0.15 90);">AIME Imagi-Nation</div>
+    <div style="width:180px;height:4px;border-radius:999px;background:oklch(0.95 0.02 85 / 0.15);overflow:hidden;">
+      <div style="width:100%;height:100%;border-radius:999px;background:oklch(0.55 0.23 302);transform-origin:left;animation:cerSplashFill 0.5s ease-out forwards;"></div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+  <div class="cer-toast" style="position:fixed;top:20px;right:20px;z-index:50;display:flex;align-items:center;gap:6px;background:oklch(0.55 0.23 302);color:oklch(0.99 0.01 85);border-radius:999px;padding:9px 18px;font-weight:700;font-size:13px;box-shadow:0 14px 34px -12px oklch(0.1 0.1 300 / 0.6);">
+    <img src="assets/badge-star.png" style="width:16px;height:16px;object-fit:contain;"> +100 XP
+  </div>
+</sc-if>
+
+<div style="position:relative;z-index:1;max-width:900px;margin:0 auto;padding:28px 20px 90px;min-height:100dvh;display:flex;flex-direction:column;font-family:'Inter',sans-serif;transform:{{ zoomTransform }};opacity:{{ zoomOpacity }};filter:{{ zoomFilter }};transition:{{ zoomTransition }};transform-style:preserve-3d;will-change:transform,opacity,filter;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;padding:0;transition:transform 0.2s ease;" style-hover="transform:scale(1.06) rotate(-3deg);">
+      <img src="assets/logo-final.png" style="width:48px;height:48px;object-fit:contain;">
+      <div style="text-align:left;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:oklch(0.82 0.15 90);">AIME Imagi-Nation</div>
+        <div style="font-family:'Anton',sans-serif;font-size:22px;color:oklch(0.99 0.01 85);text-transform:uppercase;letter-spacing:0.01em;">Ceremony-In</div>
+      </div>
+    </button>
+    <sc-if value="{{ showIdentityBadge }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1.5px solid oklch(0.16 0.02 280);background:oklch(0.99 0.01 85);border-radius:999px;padding:8px 18px;text-align:right;">
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:oklch(0.16 0.02 280);text-transform:uppercase;">{{ headerName }}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.45 0.18 302);">{{ headerPath }}</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <div style="display:inline-flex;align-items:center;gap:10px;" role="img" aria-label="{{ ringAriaLabel }}">
+      <div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(oklch(0.82 0.15 90) {{ ringPct }}%, oklch(0.99 0.01 85 / 0.18) 0);display:grid;place-items:center;flex-shrink:0;transition:background 0.6s ease;">
+        <div style="width:32px;height:32px;border-radius:50%;background:oklch(0.24 0.11 300);display:grid;place-items:center;">
+          <img src="assets/badge-star.png" style="width:14px;height:14px;object-fit:contain;" alt="">
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:oklch(0.99 0.01 85);">{{ xpLabel }}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:oklch(0.82 0.15 90);">{{ ringPct }}% complete</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <div style="width:30px;height:30px;border-radius:999px;background:oklch(0.99 0.01 85);border:1.5px solid oklch(0.16 0.02 280);display:grid;place-items:center;opacity:{{ badge1Opacity }};filter:{{ badge1Filter }};transform:{{ badge1Scale }};transition:opacity 0.4s ease, filter 0.4s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1);">
+        <img src="assets/badge-star.png" style="width:17px;height:17px;object-fit:contain;">
+      </div>
+      <div style="width:30px;height:30px;border-radius:999px;background:oklch(0.99 0.01 85);border:1.5px solid oklch(0.16 0.02 280);display:grid;place-items:center;opacity:{{ badge2Opacity }};filter:{{ badge2Filter }};transform:{{ badge2Scale }};transition:opacity 0.4s ease, filter 0.4s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1);">
+        <img src="assets/badge-smiley.png" style="width:17px;height:17px;object-fit:contain;">
+      </div>
+      <div style="width:30px;height:30px;border-radius:999px;background:oklch(0.99 0.01 85);border:1.5px solid oklch(0.16 0.02 280);display:grid;place-items:center;opacity:{{ badge3Opacity }};filter:{{ badge3Filter }};transform:{{ badge3Scale }};transition:opacity 0.4s ease, filter 0.4s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1);">
+        <img src="assets/badge-tick.png" style="width:17px;height:17px;object-fit:contain;">
+      </div>
+      <div style="width:30px;height:30px;border-radius:999px;background:oklch(0.99 0.01 85);border:1.5px solid oklch(0.16 0.02 280);display:grid;place-items:center;opacity:{{ badge4Opacity }};filter:{{ badge4Filter }};transform:{{ badge4Scale }};transition:opacity 0.4s ease, filter 0.4s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1);">
+        <img src="assets/badge-hoodie.png" style="width:17px;height:17px;object-fit:contain;">
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <sc-for list="{{ progressSegments }}" as="seg" hint-placeholder-count="8">
+        <div style="flex:1;height:6px;border-radius:999px;background:{{ seg.color }};transition:background-color 0.4s ease;"></div>
+      </sc-for>
+    </div>
+    <div style="margin-top:8px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.85 0.03 85 / 0.7);">
+      <span>Level {{ stepNumber }} of {{ totalSteps }}</span>
+      <span style="color:oklch(0.82 0.15 90);">{{ stepLabel }}</span>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;flex:1;">
+
+    <sc-if value="{{ isWelcome }}" hint-placeholder-val="{{ true }}">
+      <div class="cer-anim" style="margin:0 auto;max-width:640px;background:oklch(0.97 0.03 85);border-radius:28px;padding:44px;box-shadow:0 30px 70px -25px oklch(0.12 0.08 300 / 0.55);">
+        <div style="display:inline-flex;align-items:center;gap:8px;border:1.5px solid oklch(0.16 0.02 280);border-radius:999px;padding:6px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.16 0.02 280);">
+          ✦ You are welcome here
+        </div>
+        <h1 style="margin:20px 0 0;font-family:'Anton',sans-serif;font-size:46px;line-height:0.98;text-transform:uppercase;color:oklch(0.16 0.02 280);">
+          Step into the <span style="color:oklch(0.55 0.23 302);">Ceremony-In</span>.
+        </h1>
+        <p style="margin-top:16px;max-width:480px;font-size:16px;line-height:1.6;color:oklch(0.16 0.02 280 / 0.65);">
+          This is where you meet the movement. A few gentle questions, a story you bring with you, and a path chosen with care. No forms that feel like forms.
+        </p>
+        <div style="margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+          <button onClick="{{ onBegin }}" style="display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: none; background: oklch(0.55 0.23 302); color: oklch(0.99 0.01 85); font-weight: 700; font-size: 15px; padding: 16px 30px; cursor: pointer; box-shadow: 4px 4px 0 oklch(0.16 0.02 280); transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s ease" style-hover="transform:translate(-2px,-2px) scale(1.03);box-shadow:6px 6px 0 oklch(0.16 0.02 280);" style-active="transform:translate(0,0) scale(0.92);box-shadow:2px 2px 0 oklch(0.16 0.02 280);" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:2px;">
+            Begin Ceremony-In →
+          </button>
+          <button onClick="{{ toggleGolden }}" style="display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1.5px solid oklch(0.16 0.02 280);background:transparent;color:oklch(0.16 0.02 280);font-weight:600;font-size:14px;padding:13px 22px;cursor:pointer;transition:background 0.15s ease;" style-hover="background:oklch(0.93 0.05 302 / 0.5);">
+            🎫 I have a Golden Ticket
+          </button>
+        </div>
+        <sc-if value="{{ goldenOpen }}" hint-placeholder-val="{{ false }}">
+          <div class="cer-anim" style="margin-top:20px;border:1.5px solid oklch(0.82 0.15 90);border-radius:20px;padding:20px;background:oklch(0.99 0.01 85);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.45 0.18 302);">Golden ticket or referral code</div>
+            <input value="{{ goldenValue }}" onChange="{{ onGolden }}" placeholder="e.g. RIVER-SUNRISE-2026" style="margin-top:8px;width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+            <p style="margin-top:8px;font-size:12px;color:oklch(0.16 0.02 280 / 0.55);">Optional. A Golden Ticket unlocks mentor invitations and early stages on the River Run.</p>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showStatsBar }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:36px;display:flex;flex-wrap:wrap;gap:10px;">
+            <div style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid oklch(0.16 0.02 280);border-radius:999px;padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">5 Visa Paths</div>
+            
+            <div style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid oklch(0.16 0.02 280);border-radius:999px;padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">8 Ceremony Steps</div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPath }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim">
+        <div style="max-width:640px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.82 0.15 90);">Choose a visa path</div>
+          <h2 style="margin:8px 0 0;font-family:'Anton',sans-serif;font-size:34px;text-transform:uppercase;line-height:1.02;color:oklch(0.99 0.01 85);">Which doorway feels most like yours?</h2>
+          <p style="margin-top:8px;font-size:15px;color:oklch(0.95 0.02 85 / 0.7);">Pick the one that fits today. You can carry more than one over time.</p>
+        </div>
+        <div style="margin-top:32px;position:relative;">
+          <div style="position:relative;height:290px;" data-carousel-stage="1" tabIndex="0" role="group" aria-label="Visa path carousel, use left and right arrow keys to browse" onKeyDown="{{ onCarouselKeyDown }}" style-focus="outline:2px solid oklch(0.82 0.15 90);outline-offset:6px;">
+            <sc-for list="{{ carouselCards }}" as="card" hint-placeholder-count="5">
+              <button onClick="{{ card.onClick }}" aria-label="{{ card.label }}" style="position:absolute;left:50%;top:0;width:224px;height:270px;margin-left:-112px;border:none;border-radius:20px;padding:0;overflow:hidden;cursor:pointer;background:oklch(0.97 0.03 85);box-shadow:{{ card.ring }};transform:{{ card.transform }};opacity:{{ card.opacity }};z-index:{{ card.zIndex }};pointer-events:{{ card.pointerEvents }};transition:transform 0.5s cubic-bezier(.34,1.35,.64,1), opacity 0.5s ease, box-shadow 0.2s ease;" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:3px;">
+                <img src="{{ card.banner }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                <div style="position:absolute;inset:0;background:linear-gradient(0deg, oklch(0.1 0.05 300 / 0.55), transparent 55%);"></div>
+                <div style="position:absolute;left:14px;bottom:14px;display:grid;place-items:center;width:36px;height:36px;border-radius:999px;background:{{ card.color }};border:2px solid oklch(0.16 0.02 280);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;color:oklch(0.16 0.02 280);">{{ card.mono }}</div>
+                <sc-if value="{{ card.isChosen }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:999px;background:{{ gold }};display:grid;place-items:center;font-size:13px;font-weight:700;color:oklch(0.16 0.02 280);">✓</div>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ onCarouselPrev }}" disabled="{{ prevArrowDisabled }}" aria-label="Previous visa path" style="position:absolute;left:0;top:120px;width:38px;height:38px;border-radius:999px;border:1.5px solid oklch(0.16 0.02 280);background:oklch(0.99 0.01 85);cursor:pointer;opacity:{{ prevArrowOpacity }};display:grid;place-items:center;font-size:16px;transition:transform 0.2s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 16px -8px oklch(0.1 0.05 300 / 0.5);z-index:200;" style-hover="transform:scale(1.15);" style-active="transform:scale(0.85);" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:2px;">←</button>
+          <button onClick="{{ onCarouselNext }}" disabled="{{ nextArrowDisabled }}" aria-label="Next visa path" style="position:absolute;right:0;top:120px;width:38px;height:38px;border-radius:999px;border:1.5px solid oklch(0.16 0.02 280);background:oklch(0.99 0.01 85);cursor:pointer;opacity:{{ nextArrowOpacity }};display:grid;place-items:center;font-size:16px;transition:transform 0.2s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 16px -8px oklch(0.1 0.05 300 / 0.5);z-index:200;" style-hover="transform:scale(1.15);" style-active="transform:scale(0.85);" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:2px;">→</button>
+          <div style="display:flex;justify-content:center;gap:6px;margin-top:10px;" role="tablist" aria-label="Visa path selector">
+            <sc-for list="{{ carouselDots }}" as="dot" hint-placeholder-count="5">
+              <button onClick="{{ dot.onClick }}" aria-label="{{ dot.label }}" style="height:8px;width:{{ dot.w }};border-radius:999px;border:none;background:{{ dot.bg }};cursor:pointer;transition:all 0.25s cubic-bezier(.34,1.56,.64,1);" style-hover="transform:scaleY(1.6);" style-active="transform:scale(0.8);" style-focus="outline:2px solid oklch(0.82 0.15 90);outline-offset:3px;"></button>
+            </sc-for>
+          </div>
+          <div class="cer-anim" style="max-width:420px;margin:26px auto 0;text-align:center;">
+            <div style="font-family:'Anton',sans-serif;font-size:24px;text-transform:uppercase;color:oklch(0.99 0.01 85);">{{ activePath.name }}</div>
+            <div style="margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;color:oklch(0.82 0.15 90);">{{ activePath.tagline }}</div>
+            <p style="margin-top:14px;font-size:14px;line-height:1.6;color:oklch(0.95 0.02 85 / 0.65);">{{ activePath.description }}</p>
+            <div style="margin:22px auto 0;display:flex;flex-direction:column;gap:10px;border-top:1px solid oklch(0.95 0.02 85 / 0.15);padding-top:16px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:oklch(0.95 0.02 85 / 0.5);">Visa Path</span><span style="font-weight:700;color:oklch(0.99 0.01 85);">{{ activePath.name }}</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:oklch(0.95 0.02 85 / 0.5);">Status</span><span style="font-weight:700;color:{{ activePath.statusColor }};">{{ activePath.statusText }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isIdentity }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim" style="margin:0 auto;max-width:660px;background:oklch(0.97 0.03 85);border-radius:28px;padding:40px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.45 0.18 302);">A few gentle details</div>
+        <h2 style="margin:8px 0 0;font-family:'Anton',sans-serif;font-size:30px;text-transform:uppercase;color:oklch(0.16 0.02 280);">Tell us who is arriving.</h2>
+        <p style="margin-top:6px;font-size:14px;color:oklch(0.16 0.02 280 / 0.6);">Just the basics. Your story comes next.</p>
+        <div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <label style="display:block;">
+            <div style="margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.45 0.18 302);">First name *</div>
+            <input value="{{ firstName }}" onChange="{{ onFirstName }}" placeholder="Ada" style="width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+          </label>
+          <label style="display:block;">
+            <div style="margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.45 0.18 302);">Last name *</div>
+            <input value="{{ lastName }}" onChange="{{ onLastName }}" placeholder="Aroha" style="width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+          </label>
+          <label style="display:block;">
+            <div style="margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.45 0.18 302);">Email *</div>
+            <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="you@village.earth" style="width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+          </label>
+          <label style="display:block;">
+            <div style="margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.45 0.18 302);">Mother tongue *</div>
+            <input value="{{ motherTongue }}" onChange="{{ onMotherTongue }}" placeholder="Te Reo Māori" style="width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+          </label>
+          <label style="display:block;">
+            <div style="margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.45 0.18 302);">City *</div>
+            <input value="{{ city }}" onChange="{{ onCity }}" placeholder="Sydney" style="width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+          </label>
+          <label style="display:block;">
+            <div style="margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.45 0.18 302);">Country *</div>
+            <input value="{{ country }}" onChange="{{ onCountry }}" placeholder="Australia" style="width:100%;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:12px;padding:11px 14px;font-size:14px;outline:none;background:oklch(1 0 0);transition:border-color 0.2s ease, box-shadow 0.2s ease;" style-focus="border-color:oklch(0.55 0.23 302);box-shadow:0 0 0 3px oklch(0.55 0.23 302 / 0.25);">
+          </label>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStory }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim" style="margin:0 auto;max-width:660px;background:oklch(0.97 0.03 85);border-radius:28px;padding:40px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.45 0.18 302);">Your reflection</div>
+        <h2 style="margin:8px 0 0;font-family:'Anton',sans-serif;font-size:30px;text-transform:uppercase;color:oklch(0.16 0.02 280);">What brought you to the river?</h2>
+        <p style="margin-top:6px;font-size:14px;color:oklch(0.16 0.02 280 / 0.6);">A paragraph is plenty. Write like you are talking to a mentor.</p>
+        <textarea value="{{ story }}" onChange="{{ onStory }}" rows="7" placeholder="I keep noticing that..." style="margin-top:18px;width:100%;min-height:160px;border:1.5px solid oklch(0.16 0.02 280 / 0.25);border-radius:18px;padding:16px;font-size:15px;line-height:1.6;font-family:'Inter',sans-serif;outline:none;resize:vertical;background:oklch(1 0 0);"></textarea>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;font-size:12px;color:oklch(0.16 0.02 280 / 0.45);">
+          <span>Written from the heart, not for the algorithm.</span>
+          <span>{{ storyLength }} characters</span>
+        </div>
+
+        <div style="margin-top:28px;border-radius:22px;background:oklch(0.93 0.05 302 / 0.5);padding:24px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.45 0.18 302);">A relational welcome</div>
+              <h3 style="margin:6px 0 0;font-family:'Anton',sans-serif;font-size:21px;text-transform:uppercase;color:oklch(0.16 0.02 280);">Name four beings you bring with you.</h3>
+              <p style="margin-top:8px;font-size:13px;line-height:1.6;color:oklch(0.16 0.02 280 / 0.6);">Not yourself. Four others whose presence walks beside you into Imagination — past, present or future, human or more than human.</p>
+            </div>
+            <div style="flex-shrink:0;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;background:{{ namedBadgeBg }};color:{{ namedBadgeColor }};">{{ namedCount }} of 4</div>
+          </div>
+          <div style="margin-top:16px;display:grid;gap:10px;">
+            <sc-for list="{{ beingsView }}" as="b" hint-placeholder-count="4">
+              <div style="border-radius:16px;background:oklch(0.99 0.01 85);padding:12px 14px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="display:grid;place-items:center;flex-shrink:0;width:26px;height:26px;border-radius:999px;background:oklch(0.82 0.15 90);border:1.5px solid oklch(0.16 0.02 280);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:oklch(0.16 0.02 280);">{{ b.num }}</div>
+                  <input value="{{ b.name }}" onChange="{{ b.onName }}" placeholder="{{ b.placeholder }}" style="flex:1;border:1px solid oklch(0.16 0.02 280 / 0.2);border-radius:10px;padding:8px 12px;font-size:13px;outline:none;background:oklch(1 0 0);">
+                </div>
+                <input value="{{ b.note }}" onChange="{{ b.onNote }}" placeholder="Why they walk with you" style="margin-top:8px;width:100%;border:none;background:transparent;padding:4px 12px;font-size:12px;color:oklch(0.16 0.02 280 / 0.55);outline:none;">
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim" style="margin:0 auto;max-width:660px;background:oklch(0.97 0.03 85);border-radius:28px;padding:44px;border:3px solid {{ resultRing }};">
+        <div style="display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 14px 6px 8px;font-size:11px;font-weight:700;background:{{ resultBadgeBg }};color:{{ resultBadgeColor }};">
+          <sc-if value="{{ isVerdictGreen }}" hint-placeholder-val="{{ false }}"><img src="assets/badge-tick.png" style="width:18px;height:18px;object-fit:contain;"></sc-if>
+          <sc-if value="{{ isVerdictYellow }}" hint-placeholder-val="{{ false }}"><img src="assets/badge-star.png" style="width:18px;height:18px;object-fit:contain;"></sc-if>
+          <sc-if value="{{ isVerdictRedFlag }}" hint-placeholder-val="{{ false }}"><img src="assets/badge-alert.png" style="width:18px;height:18px;object-fit:contain;"></sc-if>
+          {{ resultBadgeText }}
+        </div>
+        <h2 style="margin:18px 0 0;font-family:'Anton',sans-serif;font-size:38px;line-height:1.02;text-transform:uppercase;color:oklch(0.16 0.02 280);">{{ resultTitle }}</h2>
+        <p style="margin-top:14px;max-width:480px;font-size:15px;line-height:1.6;color:oklch(0.16 0.02 280 / 0.65);">{{ resultBody }}</p>
+        <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:8px;">
+          <sc-for list="{{ resultTags }}" as="t" hint-placeholder-count="3">
+            <span style="border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;background:oklch(0.93 0.05 302 / 0.5);color:oklch(0.45 0.18 302);">{{ t.text }}</span>
+          </sc-for>
+        </div>
+        <button onClick="{{ toggleDetails }}" style="margin-top:24px;background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:oklch(0.45 0.18 302);display:inline-flex;align-items:center;gap:6px;">
+          {{ detailsToggleLabel }}
+        </button>
+        <sc-if value="{{ detailsOpen }}" hint-placeholder-val="{{ false }}">
+          <div class="cer-anim" style="margin-top:14px;border-radius:18px;background:oklch(0.99 0.01 85);padding:20px;font-size:13px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <sc-for list="{{ resultDetails }}" as="d" hint-placeholder-count="6">
+                <div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.16 0.02 280 / 0.4);">{{ d.k }}</div>
+                  <div style="margin-top:2px;color:oklch(0.16 0.02 280);">{{ d.v }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim" style="margin:0 auto;max-width:660px;background:oklch(0.97 0.03 85);border-radius:28px;padding:40px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.45 0.18 302);">{{ quizSubtitle }}</div>
+        <h2 style="margin:8px 0 0;font-family:'Anton',sans-serif;font-size:28px;text-transform:uppercase;color:oklch(0.16 0.02 280);">{{ quizTitle }}</h2>
+        <sc-if value="{{ quizHasIntro }}" hint-placeholder-val="{{ false }}">
+          <p style="margin-top:8px;font-size:13px;line-height:1.6;color:oklch(0.16 0.02 280 / 0.6);">{{ quizIntro }}</p>
+        </sc-if>
+        <div style="margin-top:24px;display:grid;gap:26px;">
+          <sc-for list="{{ quizQuestions }}" as="q" hint-placeholder-count="3">
+            <div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;">
+                <p style="margin:0;font-size:14px;line-height:1.55;color:oklch(0.16 0.02 280);">{{ q.prompt }}</p>
+                <span style="flex-shrink:0;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700;background:oklch(0.93 0.05 302 / 0.5);color:oklch(0.45 0.18 302);">{{ q.scaleLabel }}</span>
+              </div>
+              <sc-if value="{{ q.isBinary }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px;display:flex;gap:10px;">
+                  <button onClick="{{ q.onPickNo }}" aria-pressed="{{ q.noSelected }}" style="flex:1;border-radius:14px;padding:14px;font-weight:700;font-size:14px;cursor:pointer;transition:transform 0.18s cubic-bezier(.34,1.56,.64,1), background 0.15s ease, border-color 0.15s ease;border:2px solid {{ q.noBorder }};background:{{ q.noBg }};color:{{ q.noColor }};" style-active="transform:scale(0.93);" style-focus="outline:2px solid oklch(0.55 0.23 302);outline-offset:2px;">No</button>
+                  <button onClick="{{ q.onPickYes }}" aria-pressed="{{ q.yesSelected }}" style="flex:1;border-radius:14px;padding:14px;font-weight:700;font-size:14px;cursor:pointer;transition:transform 0.18s cubic-bezier(.34,1.56,.64,1), background 0.15s ease, border-color 0.15s ease;border:2px solid {{ q.yesBorder }};background:{{ q.yesBg }};color:{{ q.yesColor }};" style-active="transform:scale(0.93);" style-focus="outline:2px solid oklch(0.55 0.23 302);outline-offset:2px;">Yes</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ q.isBinary }}" hint-placeholder-val="{{ true }}">
+              <input class="cer-range" type="range" min="0" max="{{ q.max }}" step="1" value="{{ q.value }}" onChange="{{ q.onChange }}" aria-label="{{ q.prompt }}" style="margin-top:12px;width:100%;background:linear-gradient(to right, oklch(0.55 0.23 302) {{ q.pct }}%, oklch(0.88 0.02 85) {{ q.pct }}%);">
+              <div style="margin-top:6px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:oklch(0.16 0.02 280 / 0.4);">
+                <span>{{ q.scaleMin }}</span>
+                <span>{{ q.scaleMax }}</span>
+              </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:28px;display:flex;flex-wrap:wrap;gap:4px;">
+          <sc-for list="{{ quizDots }}" as="dot" hint-placeholder-count="39">
+            <span style="width:6px;height:6px;border-radius:999px;background:{{ dot.color }};transform:{{ dot.scale }};"></span>
+          </sc-for>
+        </div>
+        <div style="margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.16 0.02 280 / 0.45);">Section {{ quizSectionNumber }} of {{ quizTotalSections }}</div>
+
+        <div style="margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:999px;background:oklch(0.99 0.01 85);border:1.5px solid oklch(0.16 0.02 280 / 0.15);padding:8px;">
+          <button onClick="{{ onQuizPrev }}" style="border:none;background:none;cursor:pointer;border-radius:999px;padding:10px 18px;font-weight:600;font-size:13px;color:oklch(0.45 0.18 302);transition:background 0.15s ease;" style-hover="background:oklch(0.93 0.05 302 / 0.4);">← {{ quizPrevLabel }}</button>
+          <button onClick="{{ onQuizNext }}" style="border:none;cursor:pointer;border-radius:999px;padding:12px 22px;font-weight:700;font-size:13px;background:oklch(0.55 0.23 302);color:oklch(0.99 0.01 85);transition:transform 0.22s cubic-bezier(.34,1.56,.64,1);" style-hover="transform:scale(1.05);" style-active="transform:scale(0.9);" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:2px;">{{ quizNextLabel }} →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isAgreements }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim" style="margin:0 auto;max-width:660px;background:oklch(0.97 0.03 85);border-radius:28px;padding:40px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.45 0.18 302);">{{ agHeaderTitle }}</div>
+        <p style="margin-top:6px;font-size:13px;color:oklch(0.16 0.02 280 / 0.6);">{{ agHeaderDescription }}</p>
+
+        <div style="margin-top:22px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.45 0.18 302);">{{ agInstructionalTitle }}</div>
+          <h2 style="margin:4px 0 0;font-family:'Anton',sans-serif;font-size:24px;text-transform:uppercase;color:oklch(0.16 0.02 280);">{{ agBodyTitle }}</h2>
+          <div style="margin-top:12px;max-height:220px;overflow-y:auto;border-radius:18px;background:oklch(0.93 0.02 85);padding:18px;font-size:13px;line-height:1.6;color:oklch(0.16 0.02 280 / 0.75);">{{ agBodyDescription }}</div>
+        </div>
+
+        <div style="margin-top:24px;border-radius:22px;background:oklch(0.93 0.05 302 / 0.5);padding:22px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.45 0.18 302);">{{ agSubmissionInstructionTitle }}</div>
+          <h3 style="margin:4px 0 0;font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;color:oklch(0.16 0.02 280);">{{ agSubmissionTitle }}</h3>
+          <p style="margin-top:6px;font-size:13px;color:oklch(0.16 0.02 280 / 0.6);">{{ agSubmissionDescription }}</p>
+          <div style="margin-top:14px;display:grid;gap:10px;">
+            <sc-for list="{{ agStatements }}" as="s" hint-placeholder-count="2">
+              <label style="display:flex;align-items:flex-start;gap:10px;border-radius:14px;background:oklch(0.99 0.01 85);padding:14px;cursor:pointer;transition:transform 0.15s cubic-bezier(.34,1.56,.64,1);" style-active="transform:scale(0.97);">
+                <input type="checkbox" class="cer-check" checked="{{ s.checked }}" onChange="{{ s.onChange }}">
+                <span style="font-size:13px;line-height:1.55;color:oklch(0.16 0.02 280);">{{ s.text }}</span>
+              </label>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:4px;">
+          <sc-for list="{{ agDots }}" as="dot" hint-placeholder-count="2">
+            <span style="width:6px;height:6px;border-radius:999px;background:{{ dot.color }};transform:{{ dot.scale }};"></span>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:999px;background:oklch(0.99 0.01 85);border:1.5px solid oklch(0.16 0.02 280 / 0.15);padding:8px;">
+          <button onClick="{{ onAgreementPrev }}" style="border:none;background:none;cursor:pointer;border-radius:999px;padding:10px 18px;font-weight:600;font-size:13px;color:oklch(0.45 0.18 302);transition:background 0.15s ease;" style-hover="background:oklch(0.93 0.05 302 / 0.4);">← {{ agPrevLabel }}</button>
+          <button onClick="{{ onAgreementNext }}" disabled="{{ agNextDisabled }}" style="border:none;cursor:pointer;border-radius:999px;padding:12px 22px;font-weight:700;font-size:13px;background:oklch(0.55 0.23 302);color:oklch(0.99 0.01 85);opacity:{{ agNextOpacity }};transition:transform 0.22s cubic-bezier(.34,1.56,.64,1);" style-hover="transform:scale(1.05);" style-active="transform:scale(0.9);" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:2px;">{{ agNextLabel }} →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isJourney }}" hint-placeholder-val="{{ false }}">
+      <div class="cer-anim">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;max-width:640px;">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.82 0.15 90);">River Run</div>
+            <h2 style="margin:8px 0 0;font-family:'Anton',sans-serif;font-size:32px;text-transform:uppercase;line-height:1.02;color:oklch(0.99 0.01 85);">Your next steps down the river.</h2>
+            <p style="margin-top:8px;font-size:14px;color:oklch(0.95 0.02 85 / 0.7);">A gamified mentoring pathway. Move at the pace of trust.</p>
+            <p style="margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.82 0.15 90);">You've earned {{ xpLabel }} getting here.</p>
+          </div>
+          <img src="assets/passport.png" style="width:84px;flex-shrink:0;transform:rotate(6deg);filter:drop-shadow(0 12px 20px oklch(0.1 0.05 300 / 0.5));">
+        </div>
+        <div style="position:relative;height:0;overflow:visible;">
+          <img src="assets/badge-star.png" style="position:absolute;left:6%;top:-6px;width:20px;animation:confettiFall 1.9s ease-in 0s both;">
+          <img src="assets/badge-tick.png" style="position:absolute;left:22%;top:-6px;width:16px;animation:confettiFall 2.2s ease-in 0.15s both;">
+          <img src="assets/badge-star.png" style="position:absolute;left:40%;top:-6px;width:14px;animation:confettiFall 1.7s ease-in 0.3s both;">
+          <img src="assets/badge-smiley.png" style="position:absolute;left:58%;top:-6px;width:18px;animation:confettiFall 2.4s ease-in 0.05s both;">
+          <img src="assets/badge-tick.png" style="position:absolute;left:75%;top:-6px;width:16px;animation:confettiFall 2s ease-in 0.25s both;">
+          <img src="assets/badge-star.png" style="position:absolute;left:90%;top:-6px;width:18px;animation:confettiFall 2.1s ease-in 0.1s both;">
+        </div>
+        <div style="margin-top:26px;display:grid;gap:14px;max-width:640px;">
+          <sc-for list="{{ stagesView }}" as="s" hint-placeholder-count="0">
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="display:grid;place-items:center;flex-shrink:0;width:44px;height:44px;border-radius:999px;background:{{ s.dotBg }};border:2px solid oklch(0.16 0.02 280);font-size:16px;color:oklch(0.16 0.02 280);">
+                <sc-if value="{{ s.isDone }}" hint-placeholder-val="{{ false }}"><img src="assets/badge-tick.png" style="width:22px;height:22px;object-fit:contain;"></sc-if>
+                <sc-if value="{{ s.isUnlocked }}" hint-placeholder-val="{{ false }}"><img src="assets/badge-star.png" style="width:22px;height:22px;object-fit:contain;"></sc-if>
+                <sc-if value="{{ s.isLocked }}" hint-placeholder-val="{{ true }}">🔒</sc-if>
+              </div>
+              <div style="flex:1;border-radius:20px;background:{{ s.cardBg }};padding:18px 20px;transition:transform 0.2s ease;" style-hover="transform:translateX(3px);">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                  <div style="font-family:'Anton',sans-serif;font-size:17px;text-transform:uppercase;color:oklch(0.16 0.02 280);">{{ s.title }}</div>
+                  <span style="border-radius:999px;padding:4px 12px;font-size:10px;font-weight:700;background:{{ s.badgeBg }};color:{{ s.badgeColor }};">{{ s.badgeText }}</span>
+                </div>
+                <p style="margin-top:4px;font-size:13px;color:oklch(0.16 0.02 280 / 0.6);">{{ s.note }}</p>
+                <sc-if value="{{ s.showButton }}" hint-placeholder-val="{{ false }}">
+                  <button style="margin-top:10px;border:none;cursor:pointer;border-radius:999px;padding:9px 18px;font-size:12px;font-weight:700;background:oklch(0.82 0.15 90);color:oklch(0.16 0.02 280);transition:transform 0.15s ease;" style-hover="transform:scale(1.05);" style-active="transform:scale(0.95);">Begin this stage →</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ showBottomNav }}" hint-placeholder-val="{{ false }}">
+    <div class="cer-anim" style="position:sticky;bottom:16px;margin-top:36px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:999px;background:oklch(0.97 0.03 85 / 0.95);backdrop-filter:blur(6px);padding:8px;border:1.5px solid oklch(0.16 0.02 280 / 0.15);">
+      <button onClick="{{ onBack }}" style="border:none;background:none;cursor:pointer;border-radius:999px;padding:10px 20px;font-weight:600;font-size:14px;color:oklch(0.45 0.18 302);transition:background 0.15s ease;" style-hover="background:oklch(0.93 0.05 302 / 0.4);">← Back</button>
+      <sc-if value="{{ isNotLastStep }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ onNext }}" disabled="{{ navDisabled }}" style="border:none;cursor:pointer;border-radius:999px;padding:13px 26px;font-weight:700;font-size:14px;background:oklch(0.55 0.23 302);color:oklch(0.99 0.01 85);opacity:{{ nextOpacity }};transition:transform 0.22s cubic-bezier(.34,1.56,.64,1);" style-hover="transform:scale(1.05);" style-active="transform:scale(0.9);" style-focus="outline:3px solid oklch(0.82 0.15 90);outline-offset:2px;">{{ nextLabel }} →</button>
+      </sc-if>
+      <sc-if value="{{ isLastStep }}" hint-placeholder-val="{{ false }}">
+        <span style="border-radius:999px;padding:11px 20px;font-weight:600;font-size:13px;background:oklch(0.93 0.05 302 / 0.5);color:oklch(0.45 0.18 302);">Welcome to the river.</span>
+      </sc-if>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;canvasMode&quot;: {&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;violet&quot;,&quot;options&quot;:[&quot;violet&quot;,&quot;teal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},
+  &quot;showStatsBar&quot;: {&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Look&quot;},
+  &quot;startWithGoldenTicketOpen&quot;: {&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}
+}">
+const STEP_KEYS = ["welcome","path","identity","story","result","quiz","agreements","journey"];
+const STEP_LABELS = {welcome:"Welcome",path:"Visa Path",identity:"Who you are",story:"Your story",result:"Ceremony",quiz:"Relational Check-in",agreements:"Agreements",journey:"River Run"};
+
+const STEP_SCENES = {
+  welcome: { t1: "oklch(0.42 0.17 300)", t2: "oklch(0.50 0.20 30 / 0.35)", items: [
+    {src:"assets/icon-sun.png", top:"8%", side:"left:6%", width:"90px", opacity:0.5, anim:"cerFloatSlow 9s ease-in-out infinite"},
+    {src:"assets/icon-moon.png", top:"14%", side:"right:8%", width:"78px", opacity:0.55, anim:"cerFloatSlow 11s ease-in-out infinite 1s"},
+    {src:"assets/icon-balloon1.png", top:"46%", side:"left:10%", width:"52px", opacity:0.45, anim:"cerDrift1 22s ease-in-out infinite"},
+    {src:"assets/icon-tree.png", top:"auto", side:"right:5%", width:"200px", opacity:0.16, anim:"none", bottom:"-4%"},
+  ]},
+  path: { t1: "oklch(0.40 0.16 250)", t2: "oklch(0.55 0.18 200 / 0.35)", items: [
+    {src:"assets/icon-telescope.png", top:"10%", side:"right:10%", width:"84px", opacity:0.55, anim:"cerFloatSlow 10s ease-in-out infinite"},
+    {src:"assets/icon-balloon3.png", top:"38%", side:"left:7%", width:"50px", opacity:0.45, anim:"cerDrift2 24s ease-in-out infinite"},
+    {src:"assets/icon-balloon1.png", top:"62%", side:"right:12%", width:"40px", opacity:0.35, anim:"cerDrift1 28s ease-in-out infinite 2s"},
+    {src:"assets/icon-tree.png", top:"auto", side:"left:4%", width:"180px", opacity:0.14, anim:"none", bottom:"-4%"},
+  ]},
+  identity: { t1: "oklch(0.42 0.20 330)", t2: "oklch(0.35 0.16 290 / 0.4)", items: [
+    {src:"assets/icon-moon.png", top:"12%", side:"left:8%", width:"70px", opacity:0.5, anim:"cerFloatSlow 12s ease-in-out infinite"},
+    {src:"assets/icon-bank.png", top:"40%", side:"right:10%", width:"110px", opacity:0.3, anim:"cerFloatSlow 13s ease-in-out infinite 1s"},
+    {src:"assets/icon-cinema.png", top:"64%", side:"left:14%", width:"90px", opacity:0.25, anim:"none"},
+    {src:"assets/icon-tree.png", top:"auto", side:"right:4%", width:"190px", opacity:0.14, anim:"none", bottom:"-4%"},
+  ]},
+  story: { t1: "oklch(0.50 0.19 40)", t2: "oklch(0.45 0.20 320 / 0.35)", items: [
+    {src:"assets/icon-cinema.png", top:"9%", side:"left:9%", width:"110px", opacity:0.35, anim:"cerFloatSlow 10s ease-in-out infinite"},
+    {src:"assets/icon-sun.png", top:"16%", side:"right:9%", width:"80px", opacity:0.4, anim:"cerFloatSlow 9s ease-in-out infinite 1s"},
+    {src:"assets/icon-balloon3.png", top:"55%", side:"left:12%", width:"46px", opacity:0.35, anim:"cerDrift2 25s ease-in-out infinite"},
+    {src:"assets/icon-tree.png", top:"auto", side:"right:4%", width:"190px", opacity:0.15, anim:"none", bottom:"-4%"},
+  ]},
+  result: { t1: "oklch(0.55 0.16 90 / 0.5)", t2: "oklch(0.42 0.17 300)", items: [
+    {src:"assets/icon-sun.png", top:"9%", side:"left:8%", width:"110px", opacity:0.6, anim:"cerFloatSlow 9s ease-in-out infinite"},
+    {src:"assets/icon-moon.png", top:"13%", side:"right:8%", width:"84px", opacity:0.5, anim:"cerFloatSlow 11s ease-in-out infinite 1s"},
+    {src:"assets/icon-telescope.png", top:"58%", side:"right:14%", width:"76px", opacity:0.3, anim:"none"},
+    {src:"assets/icon-bridge.png", top:"auto", side:"left:30%", width:"320px", opacity:0.15, anim:"none", bottom:"-3%"},
+  ]},
+  quiz: { t1: "oklch(0.55 0.13 195)", t2: "oklch(0.40 0.16 260 / 0.35)", items: [
+    {src:"assets/icon-bank.png", top:"11%", side:"right:9%", width:"100px", opacity:0.3, anim:"cerFloatSlow 12s ease-in-out infinite"},
+    {src:"assets/icon-moon.png", top:"15%", side:"left:8%", width:"66px", opacity:0.4, anim:"cerFloatSlow 13s ease-in-out infinite 1s"},
+    {src:"assets/icon-bridge.png", top:"auto", side:"left:34%", width:"300px", opacity:0.16, anim:"none", bottom:"-3%"},
+    {src:"assets/icon-tree.png", top:"auto", side:"right:4%", width:"180px", opacity:0.14, anim:"none", bottom:"-4%"},
+  ]},
+  agreements: { t1: "oklch(0.32 0.15 300)", t2: "oklch(0.40 0.16 250 / 0.4)", items: [
+    {src:"assets/icon-bank.png", top:"10%", side:"left:9%", width:"100px", opacity:0.3, anim:"cerFloatSlow 11s ease-in-out infinite"},
+    {src:"assets/icon-telescope.png", top:"60%", side:"right:12%", width:"78px", opacity:0.3, anim:"none"},
+    {src:"assets/icon-balloon1.png", top:"20%", side:"right:8%", width:"44px", opacity:0.35, anim:"cerDrift1 26s ease-in-out infinite 2s"},
+    {src:"assets/icon-tree.png", top:"auto", side:"left:5%", width:"190px", opacity:0.15, anim:"none", bottom:"-4%"},
+  ]},
+  journey: { t1: "oklch(0.58 0.16 90 / 0.45)", t2: "oklch(0.42 0.19 300)", items: [
+    {src:"assets/icon-sun.png", top:"8%", side:"left:6%", width:"90px", opacity:0.5, anim:"cerFloatSlow 9s ease-in-out infinite"},
+    {src:"assets/icon-moon.png", top:"12%", side:"right:6%", width:"84px", opacity:0.5, anim:"cerFloatSlow 11s ease-in-out infinite 1s"},
+    {src:"assets/icon-balloon1.png", top:"42%", side:"left:11%", width:"50px", opacity:0.4, anim:"cerDrift1 22s ease-in-out infinite"},
+    {src:"assets/icon-balloon3.png", top:"56%", side:"right:14%", width:"46px", opacity:0.4, anim:"cerDrift2 26s ease-in-out infinite 2s"},
+    {src:"assets/icon-bridge.png", top:"auto", side:"left:32%", width:"320px", opacity:0.16, anim:"none", bottom:"-3%"},
+  ]},
+};
+
+const PATHS = [
+  {id:"joy-corp",name:"Joy Corp",tagline:"For organisations rewriting how business feels",description:"Companies redesigning around relational value, mentoring and joy.",mono:"JC",color:"oklch(0.70 0.14 45)",banner:"assets/path-joy-corp.jpeg"},
+  {id:"presidents",name:"IMAGI-NATION Presidents",tagline:"For young leaders imagining new nations",description:"Young people age 13 to 18 leading unreasonable, world changing projects.",mono:"IP",color:"oklch(0.82 0.14 88)",banner:"assets/path-presidents.jpeg"},
+  {id:"schools",name:"IMAGI-NATION Schools",tagline:"For classrooms that mentor forward",description:"Schools weaving imagination and mentoring into how learning happens.",mono:"IS",color:"oklch(0.70 0.11 190)",banner:"assets/path-schools.png"},
+  {id:"systems",name:"Systems Change Citizens",tagline:"For everyday change makers",description:"Citizens learning to shift the systems around them through mentoring.",mono:"SC",color:"oklch(0.60 0.12 230)",banner:"assets/path-systems.jpeg"},
+  {id:"iksl",name:"Indigenous Knowledge Systems Labs",tagline:"For custodians of ancient future thinking",description:"Labs centering Indigenous knowledge as design for the next 100 years.",mono:"IK",color:"oklch(0.58 0.17 30)",banner:"assets/path-iksl.jpeg"},
+];
+
+const AGREEMENTS = [
+  {slug:"agreement-one",headerTitle:"Ceremony In #1 | Agreement One",headerDescription:"A shared understanding before you continue.",instructionalTitle:"Acknowledging",bodyTitle:"How we hold each other's stories",bodyDescription:"Everything shared here is treated as a gift, not data to extract. Your reflection is read by humans who care about getting your Ceremony-In right, not a black box.\n\nIf something about this process ever feels wrong, you can say so, and someone will listen.",submissionInstructionTitle:"Submission",submissionTitle:"Before you continue",submissionDescription:"Please read and accept the statements below.",statements:[{id:1,text:"I understand my reflection will be read by people, with care."},{id:2,text:"I am arriving as myself, not as who I think the movement wants."}]},
+  {slug:"agreement-two",headerTitle:"Ceremony In #2 | Agreement Two",headerDescription:"The commitments that carry the river forward.",instructionalTitle:"Acknowledging",bodyTitle:"What mentoring asks of you",bodyDescription:"Mentoring in this movement is relational, not transactional. You give as much as you receive, and the relationship has room to end well when its purpose is served.\n\nCustodianship is a long game — measured in decades, not sprints.",submissionInstructionTitle:"Submission",submissionTitle:"Before you continue",submissionDescription:"Please read and accept the statements below.",statements:[{id:1,text:"I will show up as a mentor and a mentee, not just one or the other."},{id:2,text:"I understand this is a relationship measured in years, not a transaction."}]},
+];
+
+const BEING_PLACEHOLDERS = ["e.g. My grandmother Nan","e.g. A future child not yet born","e.g. The river near my home","e.g. Octavia Butler"];
+
+class Component extends DCLogic {
+  state = {
+    stepIdx: 0,
+    zoomStage: "idle",
+    sceneA: "welcome",
+    sceneB: null,
+    activeLayer: "a",
+    showSplash: true,
+    splashHiding: false,
+    carouselIdx: 2,
+    goldenOpen: !!this.props.startWithGoldenTicketOpen,
+    detailsOpen: false,
+    quizSectionIdx: 0,
+    agreementIdx: 0,
+    quizSections: null,
+    toast: false,
+    form: {
+      goldenTicket: "", path: null, firstName: "", lastName: "", email: "",
+      motherTongue: "", city: "", country: "", story: "",
+      beings: [{name:"",note:""},{name:"",note:""},{name:"",note:""},{name:"",note:""}],
+      quizAnswers: {}, agreementsAccepted: {},
+    },
+  };
+
+  async componentDidMount() {
+    this.reducedMotion = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mod = await import("./quiz-data.js");
+    this.setState({ quizSections: mod.QUIZ_SECTIONS, form: { ...this.state.form, quizAnswers: mod.DEFAULT_QUIZ_ANSWERS } });
+    setTimeout(() => this.setState({ splashHiding: true }), 500);
+    setTimeout(() => this.setState({ showSplash: false }), 780);
+  }
+
+  setField(k, v) { this.setState({ form: { ...this.state.form, [k]: v } }); }
+  setBeing(i, patch) {
+    const beings = [...this.state.form.beings];
+    beings[i] = { ...beings[i], ...patch };
+    this.setState({ form: { ...this.state.form, beings } });
+  }
+  setQuizAnswer(id, v) { this.setState({ form: { ...this.state.form, quizAnswers: { ...this.state.form.quizAnswers, [id]: Number(v) } } }); }
+  setAgreementAccepted(key, v) { this.setState({ form: { ...this.state.form, agreementsAccepted: { ...this.state.form.agreementsAccepted, [key]: v } } }); }
+
+  goStep(idx) {
+    const target = Math.max(0, Math.min(STEP_KEYS.length - 1, idx));
+    this.updateSceneLayer(STEP_KEYS[target]);
+    this.setState({ stepIdx: target });
+  }
+  updateSceneLayer(newStep) {
+    const s = this.state;
+    if (s.activeLayer === "a") { if (s.sceneA !== newStep) this.setState({ sceneB: newStep, activeLayer: "b" }); }
+    else { if (s.sceneB !== newStep) this.setState({ sceneA: newStep, activeLayer: "a" }); }
+  }
+  goHome = () => this.goStep(0);
+
+  canAdvance() {
+    const step = STEP_KEYS[this.state.stepIdx];
+    const f = this.state.form;
+    if (step === "path") return f.path !== null;
+    if (step === "identity") return Boolean(f.firstName.trim() && f.lastName.trim() && /\S+@\S+\.\S+/.test(f.email) && f.motherTongue.trim() && f.city.trim() && f.country.trim());
+    if (step === "story") return f.story.trim().length >= 10 && f.beings.every(b => b.name.trim().length > 0);
+    return true;
+  }
+
+  setActiveCard = (i) => this.setState({ carouselIdx: Math.max(0, Math.min(4, i)) });
+  selectCard = (i, id) => { this.setActiveCard(i); this.setField("path", id); };
+  carouselPrev = () => this.setActiveCard(this.state.carouselIdx - 1);
+  carouselNext = () => this.setActiveCard(this.state.carouselIdx + 1);
+  onCarouselKeyDown = (e) => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); this.carouselPrev(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); this.carouselNext(); }
+  };
+
+  next = () => {
+    if (!this.canAdvance()) return;
+    if (this.reducedMotion) {
+      const nextIdx = Math.min(STEP_KEYS.length - 1, this.state.stepIdx + 1);
+      this.updateSceneLayer(STEP_KEYS[nextIdx]);
+      this.setState({ stepIdx: nextIdx, detailsOpen: false, toast: true, zoomStage: "idle" });
+      clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => this.setState({ toast: false }), 1400);
+      return;
+    }
+    clearTimeout(this._zoomT1); clearTimeout(this._zoomT2); clearTimeout(this._zoomT3);
+    this.setState({ zoomStage: "out" });
+    this._zoomT1 = setTimeout(() => {
+      this.setState(s => ({ stepIdx: Math.min(STEP_KEYS.length - 1, s.stepIdx + 1), detailsOpen: false, toast: true, zoomStage: "preIn" }));
+      this.updateSceneLayer(STEP_KEYS[Math.min(STEP_KEYS.length - 1, this.state.stepIdx + 1)]);
+      clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => this.setState({ toast: false }), 1400);
+      this._zoomT2 = setTimeout(() => this.setState({ zoomStage: "in" }), 30);
+      this._zoomT3 = setTimeout(() => this.setState({ zoomStage: "idle" }), 480);
+    }, 360);
+  };
+  back = () => this.goStep(this.state.stepIdx - 1);
+
+  quizPrev = () => {
+    if (this.state.quizSectionIdx === 0) { this.back(); return; }
+    this.setState({ quizSectionIdx: this.state.quizSectionIdx - 1 });
+  };
+  quizNext = () => {
+    const total = (this.state.quizSections || []).length;
+    if (this.state.quizSectionIdx >= total - 1) { this.next(); return; }
+    this.setState({ quizSectionIdx: this.state.quizSectionIdx + 1 });
+  };
+
+  agreementPrev = () => {
+    if (this.state.agreementIdx === 0) { this.back(); return; }
+    this.setState({ agreementIdx: this.state.agreementIdx - 1 });
+  };
+  agreementNext = () => {
+    if (this.state.agreementIdx >= AGREEMENTS.length - 1) { this.next(); return; }
+    this.setState({ agreementIdx: this.state.agreementIdx + 1 });
+  };
+
+  computeVerdict() {
+    const f = this.state.form;
+    const namedCount = f.beings.filter(b => b.name.trim()).length;
+    const len = f.story.trim().length;
+    if (namedCount === 4 && len >= 120) return "green";
+    if (len >= 30) return "yellow";
+    return "red_flag";
+  }
+
+  renderVals() {
+    const s = this.state, f = s.form;
+    const step = STEP_KEYS[s.stepIdx];
+    const identityIdx = STEP_KEYS.indexOf("identity");
+    const showIdentityBadge = s.stepIdx > identityIdx;
+    const path = PATHS.find(p => p.id === f.path);
+    const ink = "oklch(0.16 0.02 280)";
+    const violet = "oklch(0.55 0.23 302)";
+    const cream = "oklch(0.97 0.03 85)";
+    const gold = "oklch(0.82 0.15 90)";
+
+    const progressSegments = STEP_KEYS.map((k, i) => ({
+      color: i < s.stepIdx ? violet : i === s.stepIdx ? gold : "oklch(0.99 0.01 85 / 0.25)",
+    }));
+
+    const activeIdx = s.carouselIdx;
+    const carouselCards = PATHS.map((p, i) => {
+      const offset = i - activeIdx;
+      const abs = Math.abs(offset);
+      const scale = offset === 0 ? 1 : abs === 1 ? 0.82 : 0.66;
+      const rotateY = Math.max(-30, Math.min(30, offset * -26));
+      const translateX = offset * 172;
+      const opacity = abs > 2 ? 0 : offset === 0 ? 1 : abs === 1 ? 0.75 : 0.42;
+      return {
+        banner: p.banner, mono: p.mono, color: p.color, label: p.name,
+        isChosen: f.path === p.id,
+        onClick: () => this.selectCard(i, p.id),
+        ring: f.path === p.id ? `0 0 0 3px ${gold}` : "0 14px 34px -16px oklch(0.1 0.06 300 / 0.5)",
+        transform: `translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
+        opacity, zIndex: 100 - abs, pointerEvents: abs > 2 ? "none" : "auto",
+      };
+    });
+    const activePathData = PATHS[activeIdx];
+    const activePathChosen = f.path === activePathData.id;
+    const activePath = {
+      name: activePathData.name, tagline: activePathData.tagline, description: activePathData.description,
+      statusText: activePathChosen ? "✓ Chosen" : "Not selected yet",
+      statusColor: activePathChosen ? gold : "oklch(0.95 0.02 85 / 0.5)",
+    };
+    const carouselDots = [0, 1, 2, 3, 4].map(i => ({
+      onClick: () => this.setActiveCard(i),
+      label: `Show ${PATHS[i].name}`,
+      bg: i === s.carouselIdx ? "oklch(0.55 0.23 302)" : "oklch(0.95 0.02 85 / 0.3)",
+      w: i === s.carouselIdx ? "22px" : "8px",
+    }));
+    const atStart = s.carouselIdx === 0, atEnd = s.carouselIdx === 4;
+
+    const beingsView = f.beings.map((b, i) => ({
+      num: i + 1,
+      name: b.name,
+      note: b.note,
+      placeholder: BEING_PLACEHOLDERS[i],
+      onName: (e) => this.setBeing(i, { name: e.target.value }),
+      onNote: (e) => this.setBeing(i, { note: e.target.value }),
+    }));
+    const namedCount = f.beings.filter(b => b.name.trim()).length;
+
+    const verdict = this.computeVerdict();
+    const first = f.firstName.trim() || "friend";
+    const verdictMap = {
+      green: { icon: "🛡", badgeText: "You are in", badgeBg: "oklch(0.88 0.1 155)", badgeColor: "oklch(0.3 0.1 155)", ring: "oklch(0.7 0.14 155)", title: `Welcome, ${first}. The river makes room for you.`, body: "Your Ceremony-In is complete. A mentor will meet you at the first bend of the River Run." },
+      yellow: { icon: "🛈", badgeText: "Held with care", badgeBg: "oklch(0.9 0.08 90)", badgeColor: "oklch(0.4 0.1 60)", ring: gold, title: `Thank you, ${first}. A human wants to meet you first.`, body: "Your reflection is thoughtful, and a mentor will read it with their own eyes before you continue down the river." },
+      red_flag: { icon: "⚑", badgeText: "Flagged for review", badgeBg: "oklch(0.9 0.06 30)", badgeColor: "oklch(0.45 0.15 25)", ring: "oklch(0.65 0.18 30)", title: `Thank you, ${first}. Your reflection has been flagged for review.`, body: "You can continue down the river. An admin will read your reflection because it did not fully meet the ceremony criteria." },
+    };
+    const theme = verdictMap[verdict];
+    const isVerdictGreen = verdict === "green", isVerdictYellow = verdict === "yellow", isVerdictRedFlag = verdict === "red_flag";
+    const resultTags = [
+      { text: `Path: ${path ? path.name : "Chosen with care"}` },
+      f.motherTongue ? { text: `Speaks: ${f.motherTongue}` } : null,
+      (f.city || f.country) ? { text: `From: ${[f.city, f.country].filter(Boolean).join(", ")}` } : null,
+      f.goldenTicket ? { text: "🎫 Golden Ticket honoured" } : null,
+    ].filter(Boolean);
+    const resultDetails = [
+      { k: "Name", v: `${f.firstName} ${f.lastName}`.trim() || "not shared" },
+      { k: "Email", v: f.email || "not shared" },
+      { k: "Mother tongue", v: f.motherTongue || "not shared" },
+      { k: "City", v: f.city || "not shared" },
+      { k: "Country", v: f.country || "not shared" },
+      { k: "Visa Path", v: path ? path.name : "not shared" },
+    ];
+
+    const quizSections = s.quizSections || [];
+    const quizReady = quizSections.length > 0;
+    const qSection = quizReady ? quizSections[s.quizSectionIdx] : null;
+    const quizQuestions = qSection ? qSection.questions.map(q => {
+      const val = f.quizAnswers[q.id] ?? 0;
+      const max = qSection.scale.length - 1;
+      const isBinary = qSection.scale.length === 2;
+      return {
+        id: q.id, prompt: q.prompt, value: val, max, isBinary,
+        pct: max ? Math.round((val / max) * 100) : 0,
+        scaleLabel: qSection.scale[val],
+        scaleMin: qSection.scale[0],
+        scaleMax: qSection.scale[qSection.scale.length - 1],
+        onChange: (e) => this.setQuizAnswer(q.id, e.target.value),
+        onPickNo: () => this.setQuizAnswer(q.id, 0),
+        onPickYes: () => this.setQuizAnswer(q.id, 1),
+        noSelected: val === 0, yesSelected: val === 1,
+        noBorder: val === 0 ? violet : "oklch(0.85 0.02 85)", noBg: val === 0 ? "oklch(0.93 0.05 302 / 0.5)" : "oklch(0.99 0.01 85)", noColor: "oklch(0.16 0.02 280)",
+        yesBorder: val === 1 ? violet : "oklch(0.85 0.02 85)", yesBg: val === 1 ? "oklch(0.93 0.05 302 / 0.5)" : "oklch(0.99 0.01 85)", yesColor: "oklch(0.16 0.02 280)",
+      };
+    }) : [];
+    const quizDots = quizSections.map((sec, i) => ({
+      color: i < s.quizSectionIdx ? violet : i === s.quizSectionIdx ? gold : "oklch(0.16 0.02 280 / 0.15)",
+      scale: i === s.quizSectionIdx ? "scale(1.4)" : "scale(1)",
+    }));
+
+    const agreement = AGREEMENTS[s.agreementIdx];
+    const agStatements = agreement.statements.map(st => {
+      const key = `${agreement.slug}:${st.id}`;
+      return { text: st.text, checked: !!f.agreementsAccepted[key], onChange: (e) => this.setAgreementAccepted(key, e.target.checked) };
+    });
+    const agAllChecked = agStatements.length > 0 && agStatements.every(x => x.checked);
+    const agDots = AGREEMENTS.map((a, i) => ({
+      color: i < s.agreementIdx ? violet : i === s.agreementIdx ? gold : "oklch(0.16 0.02 280 / 0.15)",
+      scale: i === s.agreementIdx ? "scale(1.4)" : "scale(1)",
+    }));
+
+    const hasGolden = !!f.goldenTicket.trim();
+    const rawStages = [
+      { title: "Ceremony-In", note: "You arrived with a story.", state: "done" },
+      { title: "Meet your Mentor", note: "A first conversation at the river bend.", state: "unlocked" },
+      { title: "Cohort Circle", note: "You gather with 6 to 8 fellow travellers.", state: hasGolden ? "unlocked" : "locked" },
+      { title: "First Ripple Project", note: "A small act of imagination in your city.", state: "locked" },
+      { title: "River Council", note: "You mentor someone through their Ceremony-In.", state: "locked" },
+      { title: "Custodian", note: "You carry the river forward for the next 100 years.", state: "locked" },
+    ];
+    const stagesView = rawStages.map(st => {
+      const done = st.state === "done", unlocked = st.state === "unlocked";
+      return {
+        ...st,
+        isDone: done, isUnlocked: unlocked, isLocked: !done && !unlocked,
+        dotBg: done ? violet : unlocked ? gold : "oklch(0.9 0.01 85)",
+        cardBg: done ? "oklch(0.93 0.05 302 / 0.5)" : unlocked ? cream : "oklch(0.97 0.03 85 / 0.55)",
+        badgeText: done ? "Completed" : unlocked ? "Unlocked" : "Locked",
+        badgeBg: done ? violet : unlocked ? gold : "oklch(0.85 0.01 85)",
+        badgeColor: done ? cream : ink,
+        showButton: unlocked,
+      };
+    });
+
+    const canAdvance = this.canAdvance();
+    const showBottomNav = !["welcome", "quiz", "agreements"].includes(step);
+    const nextLabel = step === "story" ? "See your Ceremony" : "Continue";
+
+    const xp = s.stepIdx * 100;
+    const idIdx = STEP_KEYS.indexOf("identity"), stIdx = STEP_KEYS.indexOf("story"), qIdx = STEP_KEYS.indexOf("quiz"), agIdx = STEP_KEYS.indexOf("agreements");
+    const badgeState = (unlocked) => ({ opacity: unlocked ? 1 : 0.35, filter: unlocked ? "none" : "grayscale(1)", scale: unlocked ? "scale(1)" : "scale(0.8)" });
+    const b1 = badgeState(s.stepIdx > idIdx), b2 = badgeState(s.stepIdx > stIdx), b3 = badgeState(s.stepIdx > qIdx), b4 = badgeState(s.stepIdx > agIdx);
+
+    const bgStars = Array.from({ length: 40 }, (_, i) => ({
+      top: `${(i * 37) % 90 + 3}%`, left: `${(i * 53) % 94 + 2}%`,
+      size: `${2 + (i % 3)}px`, dur: `${3 + (i % 4)}s`, delay: `${(i * 0.4) % 3}s`,
+    }));
+
+    const buildSceneItems = (scene) => scene.items.map(it => {
+      const posDecl = it.side.split(":");
+      return {
+        src: it.src,
+        posStyle: `${it.bottom ? `bottom:${it.bottom};` : `top:${it.top};`}${posDecl[0]}:${posDecl[1]};`,
+        width: it.width, opacity: Math.min(0.9, it.opacity + 0.16),
+        animStyle: it.anim === "none" ? "none" : it.anim,
+      };
+    });
+    const sceneAKey = s.sceneA || step, sceneBKey = s.sceneB || step;
+    const sceneAData = STEP_SCENES[sceneAKey] || STEP_SCENES.welcome;
+    const sceneBData = STEP_SCENES[sceneBKey] || STEP_SCENES.welcome;
+    const bgItemsA = buildSceneItems(sceneAData), bgItemsB = buildSceneItems(sceneBData);
+    const bgTint1A = sceneAData.t1, bgTint2A = sceneAData.t2;
+    const bgTint1B = sceneBData.t1, bgTint2B = sceneBData.t2;
+    const layerAOpacity = s.activeLayer === "a" ? 1 : 0;
+    const layerBOpacity = s.activeLayer === "b" ? 1 : 0;
+
+    const zoomStyles = {
+      idle: { transform: "perspective(1400px) rotateX(0deg) scale(1) translateY(0)", opacity: 1, filter: "none", transition: "transform 0.42s cubic-bezier(.65,0,.35,1), opacity 0.38s ease" },
+      out: { transform: "perspective(1400px) rotateX(6deg) scale(1.1) translateY(-30px)", opacity: 0, filter: "none", transition: "transform 0.36s cubic-bezier(.55,0,.85,.35), opacity 0.32s ease" },
+      preIn: { transform: "perspective(1400px) rotateX(-6deg) scale(0.92) translateY(34px)", opacity: 0, filter: "none", transition: "none" },
+      in: { transform: "perspective(1400px) rotateX(0deg) scale(1) translateY(0)", opacity: 1, filter: "none", transition: "transform 0.46s cubic-bezier(.16,1,.3,1), opacity 0.42s ease" },
+    };
+    const zs = zoomStyles[s.zoomStage] || zoomStyles.idle;
+
+    return {
+      bgStars, bgItemsA, bgItemsB, bgTint1A, bgTint2A, bgTint1B, bgTint2B, layerAOpacity, layerBOpacity,
+      showSplash: s.showSplash, splashOpacity: s.splashHiding ? 0 : 1,
+      zoomTransform: zs.transform, zoomOpacity: zs.opacity, zoomFilter: zs.filter, zoomTransition: zs.transition,
+      isTealCanvas: this.props.canvasMode === "teal",
+      isVioletCanvas: this.props.canvasMode !== "teal",
+      showStatsBar: this.props.showStatsBar !== false,
+      goHome: this.goHome,
+      showIdentityBadge, headerName: `${f.firstName} ${f.lastName}`.trim(), headerPath: path ? path.name : "",
+      progressSegments, stepNumber: s.stepIdx + 1, totalSteps: STEP_KEYS.length, stepLabel: STEP_LABELS[step],
+      isWelcome: step === "welcome", isPath: step === "path", isIdentity: step === "identity", isStory: step === "story",
+      isResult: step === "result", isQuiz: step === "quiz", isAgreements: step === "agreements", isJourney: step === "journey",
+
+      goldenOpen: s.goldenOpen, toggleGolden: () => this.setState({ goldenOpen: !s.goldenOpen }),
+      goldenValue: f.goldenTicket, onGolden: (e) => this.setField("goldenTicket", e.target.value),
+      onBegin: this.next,
+
+      carouselCards, activePath, gold, carouselDots,
+      onCarouselPrev: this.carouselPrev, onCarouselNext: this.carouselNext,
+      prevArrowOpacity: atStart ? 0.3 : 1, nextArrowOpacity: atEnd ? 0.3 : 1,
+      prevArrowDisabled: atStart, nextArrowDisabled: atEnd,
+
+      firstName: f.firstName, onFirstName: (e) => this.setField("firstName", e.target.value),
+      lastName: f.lastName, onLastName: (e) => this.setField("lastName", e.target.value),
+      email: f.email, onEmail: (e) => this.setField("email", e.target.value),
+      motherTongue: f.motherTongue, onMotherTongue: (e) => this.setField("motherTongue", e.target.value),
+      city: f.city, onCity: (e) => this.setField("city", e.target.value),
+      country: f.country, onCountry: (e) => this.setField("country", e.target.value),
+
+      story: f.story, onStory: (e) => this.setField("story", e.target.value), storyLength: f.story.trim().length,
+      beingsView, namedCount,
+      namedBadgeBg: namedCount === 4 ? gold : "oklch(0.9 0.01 85)",
+      namedBadgeColor: namedCount === 4 ? ink : "oklch(0.16 0.02 280 / 0.5)",
+
+      resultRing: theme.ring, isVerdictGreen, isVerdictYellow, isVerdictRedFlag, resultBadgeText: theme.badgeText,
+      resultBadgeBg: theme.badgeBg, resultBadgeColor: theme.badgeColor, resultTitle: theme.title, resultBody: theme.body,
+      resultTags, detailsOpen: s.detailsOpen, toggleDetails: () => this.setState({ detailsOpen: !s.detailsOpen }),
+      detailsToggleLabel: s.detailsOpen ? "Hide details ▲" : "View details ▼", resultDetails,
+
+      quizSubtitle: qSection ? (qSection.subtitle || "A relational check-in") : "A relational check-in",
+      quizTitle: qSection ? qSection.title : "Loading…", quizHasIntro: !!(qSection && qSection.intro), quizIntro: qSection ? qSection.intro : "",
+      quizQuestions, quizDots, quizSectionNumber: s.quizSectionIdx + 1, quizTotalSections: quizSections.length || 39,
+      quizPrevLabel: s.quizSectionIdx === 0 ? "Back to your Ceremony" : "Previous",
+      quizNextLabel: s.quizSectionIdx >= quizSections.length - 1 ? "Continue" : "Next",
+      onQuizPrev: this.quizPrev, onQuizNext: this.quizNext,
+
+      agHeaderTitle: agreement.headerTitle, agHeaderDescription: agreement.headerDescription,
+      agInstructionalTitle: agreement.instructionalTitle, agBodyTitle: agreement.bodyTitle, agBodyDescription: agreement.bodyDescription,
+      agSubmissionInstructionTitle: agreement.submissionInstructionTitle, agSubmissionTitle: agreement.submissionTitle, agSubmissionDescription: agreement.submissionDescription,
+      agStatements, agAllChecked, agNextDisabled: !agAllChecked, agNextOpacity: agAllChecked ? 1 : 0.4, agDots,
+      agPrevLabel: s.agreementIdx === 0 ? "Back to your check-in" : "Previous",
+      agNextLabel: s.agreementIdx >= AGREEMENTS.length - 1 ? "See River Run" : "Next",
+      onAgreementPrev: this.agreementPrev, onAgreementNext: this.agreementNext,
+
+      stagesView,
+
+      showBottomNav, canAdvance, navDisabled: !canAdvance, nextOpacity: canAdvance ? 1 : 0.4, nextLabel, onBack: this.back, onNext: this.next,
+      onCarouselKeyDown: this.onCarouselKeyDown,
+      isLastStep: s.stepIdx === STEP_KEYS.length - 1, isNotLastStep: s.stepIdx !== STEP_KEYS.length - 1,
+
+      xp, xpLabel: `${xp} XP`, showToast: s.toast === true,
+      ringPct: Math.round((s.stepIdx / (STEP_KEYS.length - 1)) * 100),
+      ringAriaLabel: `Progress: ${Math.round((s.stepIdx / (STEP_KEYS.length - 1)) * 100)} percent complete, ${xp} XP earned`,
+      badge1Opacity: b1.opacity, badge1Filter: b1.filter, badge1Scale: b1.scale, badge2Opacity: b2.opacity, badge2Filter: b2.filter, badge2Scale: b2.scale,
+      badge3Opacity: b3.opacity, badge3Filter: b3.filter, badge3Scale: b3.scale, badge4Opacity: b4.opacity, badge4Filter: b4.filter, badge4Scale: b4.scale,
+    };
+  }
+}
+</script>
+</body>
+</html>
